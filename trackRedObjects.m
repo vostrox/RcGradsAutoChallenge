@@ -1,7 +1,11 @@
 %% Initialization
- redThresh = 0.1; % Threshold for red detection
+ redThresh = 0.25; % Threshold for red detection (higher values are less sensistive)
+ frames = 500;
+ minBlobArea = 2000;
+ maxBlobArea = 10000000;
+ maxCount = 10;
  
- vidDevice = imaq.VideoDevice('winvideo', 1, 'YUY2_640x480', ... % Acquire input video stream
+ vidDevice = imaq.VideoDevice('winvideo', 2, 'I420_640x480', ... % Acquire input video stream
  'ROI', [1 1 640 480], ...
  'ReturnedColorSpace', 'rgb');
  
@@ -10,9 +14,9 @@
  hblob = vision.BlobAnalysis('AreaOutputPort', false, ... % Set blob analysis handling
  'CentroidOutputPort', true, ...
  'BoundingBoxOutputPort', true', ...
- 'MinimumBlobArea', 800, ...
- 'MaximumBlobArea', 3000, ...
- 'MaximumCount', 10);
+ 'MinimumBlobArea', minBlobArea, ...
+ 'MaximumBlobArea', maxBlobArea, ...
+ 'MaximumCount', maxCount);
  
  hshapeinsRedBox = vision.ShapeInserter('BorderColor', 'Custom', ... % Set Red box handling
  'CustomBorderColor', [1 0 0], ...
@@ -37,10 +41,10 @@
  nFrame = 0; % Frame number initialization
  
  %% Processing Loop
- while(nFrame < 100)
+ while(nFrame < frames)
     rgbFrame = step(vidDevice); % Acquire single frame
     
-    rgbFrame = flipdim(rgbFrame,2); % obtain the mirror image for displaying
+    %rgbFrame = flipdim(rgbFrame,2); % obtain the mirror image for displaying
     
     diffFrame = imsubtract(rgbFrame(:,:,1), rgb2gray(rgbFrame)); % Get red component of the image
     
