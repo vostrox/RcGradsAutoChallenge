@@ -1,12 +1,13 @@
 %% Initialization
- redThresh = 0.25; % Threshold for red detection (higher values are less sensistive)
- frames = 500;
- minBlobArea = 2000;
+ minThresh = 0.25; % Minimum intesity for threshold
+ maxThresh = 1; % Minimum intesity for threshold
+ frames = 50;
+ minBlobArea = 500;
  maxBlobArea = 10000000;
  maxCount = 10;
  
- vidDevice = imaq.VideoDevice('winvideo', 2, 'I420_640x480', ... % Acquire input video stream
- 'ROI', [1 1 640 480], ...
+ vidDevice = imaq.VideoDevice('winvideo', 2, 'I420_1280x720', ... % Acquire input video stream
+ 'ROI', [1 1 1280 720], ...
  'ReturnedColorSpace', 'rgb');
  
  vidInfo = imaqhwinfo(vidDevice); % Acquire input video property
@@ -23,7 +24,7 @@
  'Fill', true, ...
  'FillColor', 'Custom', ...
  'CustomFillColor', [1 0 0], ...
- 'Opacity', 0.4);
+ 'Opacity', 0.25);
  
  htextins = vision.TextInserter('Text', 'Number of Red Object: %2d', ... % Set text for number of blobs
  'Location', [7 2], ...
@@ -39,18 +40,19 @@
  'Position', [100 100 vidInfo.MaxWidth+20 vidInfo.MaxHeight+30]);
  
  nFrame = 0; % Frame number initialization
- 
+ %rgbFrame = imread('testImage.jpg');
  %% Processing Loop
  while(nFrame < frames)
     rgbFrame = step(vidDevice); % Acquire single frame
-    
+
     %rgbFrame = flipdim(rgbFrame,2); % obtain the mirror image for displaying
     
-    diffFrame = imsubtract(rgbFrame(:,:,1), rgb2gray(rgbFrame)); % Get red component of the image
+    %diffFrame = imsubtract(rgbFrame(:,:,1), rgb2gray(rgbFrame)); % Get red component of the image
+    diffFrame = imsubtract(convertToGrey(rgbFrame,1,0,0), rgb2gray(rgbFrame)); % Get red component of the image
     
     diffFrame = medfilt2(diffFrame, [3 3]); % Filter out the noise by using median filter
-    
-    binFrame = im2bw(diffFrame, redThresh); % Convert the image into binary image with the red objects as white
+
+    binFrame = threshold(diffFrame,minThresh,maxThresh); % Convert the image into binary image with the red objects as white
     
     [centroid, bbox] = step(hblob, binFrame); % Get the centroids and bounding boxes of the blobs
     
@@ -61,7 +63,8 @@
     vidIn = step(hshapeinsRedBox, rgbFrame, bbox); % Insert the red box
     
     for object = 1:1:length(bbox(:,1)) % Write the corresponding centroids
-        centX = centroid(object,1); centY = centroid(object,2);
+        centX = centroid(object,1);
+        centY = centroid(object,2);
         vidIn = step(htextinsCent, vidIn, [centX centY], [centX-6 centY-9]);
     end
     

@@ -1,0 +1,2 @@
+release(camera);
+release(display);
