@@ -1,8 +1,8 @@
 function [out] = findChariot(image)
     minThresh = 0.25; % Minimum intensity for threshold
     maxThresh = 255; % Minimum intesity for threshold
-    minBlobArea = 500;
-    maxBlobArea = 10000000;
+    minBlobArea = 1000;
+    maxBlobArea = 100000;
     count = 1;
     filterSize = 1;
     chariotX = 0;
