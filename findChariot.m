@@ -1,5 +1,6 @@
 function [out] = findChariot(image)
-    minThresh = 0.25; % Minimum intensity for threshold
+    minThresh = 0.30; % Minimum intensity for threshold
+    %minThresh = 80; % TEST IMAGE VALUE Minimum intensity for threshold
     maxThresh = 255; % Minimum intesity for threshold
     minBlobArea = 1000;
     maxBlobArea = 100000;
@@ -19,14 +20,23 @@ function [out] = findChariot(image)
     redChannel = medfilt2(redChannel, [filterSize filterSize]); % Filter out the noise using median filter
 
     binFrame = threshold(redChannel,minThresh,maxThresh); % Convert the image into binary image with the red objects as white
-
+    
+    %imshow(binFrame);
+    
     [centroid, bbox] = step(hblob, binFrame); % Get the centroids and bounding boxes of the blobs
     
-    centroid = uint16(centroid); % Convert the centroids into Integer for further steps
+    centroid = uint16(centroid); % Convert the centroids to 16 bit ints for further steps
     
-    for object = 1:1:length(bbox(:,1)) % Write the corresponding centroids
-        chariotX = centroid(object,1);
-        chariotY = centroid(object,2);
+    objectCount = length(bbox(:,1));
+    
+    if (objectCount > 0)
+        for object = 1:1:objectCount % Write the corresponding centroids
+            chariotX = centroid(object,1);
+            chariotY = centroid(object,2);
+        end
+    else
+        chariotX = 0;
+        chariotY = 0;
     end
 
     out = [chariotX chariotY];

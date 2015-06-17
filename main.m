@@ -1,4 +1,7 @@
-testImage = imread('SlalomTestImages\3.jpg');
+testImage = imread('testImage.png');
+ip = '255.255.255.255';
+adapter = udp(ip);
+fopen(adapter);
 
 %% Initialization
 frames = 50;
@@ -25,30 +28,77 @@ bOrbCoordinatesText = vision.TextInserter('Text', '+ X:%4d, Y:%4d', ... % set te
     'LocationSource', 'Input port', ...
     'Color', [0 0 1], ... // blue text
     'FontSize', 12);
+orientationText = vision.TextInserter('Text', 'Orientation: %4d', ... % set text for centroid
+    'LocationSource', 'Input port', ...
+    'Color', [0 0 0], ... // black text
+    'FontSize', 12);
 
-%imshow(step(camera));
+imshow(step(camera));
 
 i = 0; % Frame number initialization
 
 orientation = 0;
 
+previousChariotCoordinates = [0 0];
+previousGreenCoordinates = [0 0];
+previousBlueCoordinates = [0 0];
+previousOrientation = 0;
+
+error = 0;
+
 %% Processing Loop
+
 while(i < frames)
+    %reset error logger
+    error = 0;
+    
     frame = step(camera); % Acquire single frame
-    %frame = testImage;
-    
+        
     chariotCoordinates = findChariot(frame);
-    gOrbCoordinates = findGreenOrb(frame);
-    bOrbCoordinates = findBlueOrb(frame);
+    if ((chariotCoordinates(1) == 0) && (chariotCoordinates(2) == 0))  
+        payload = getPayload(previousChariotCoordinates(1), previousChariotCoordinates(2), previousOrientation, 1, 0, 0);
+        fwrite(adapter, payload);
+        error = 1;
+    else
+        previousChariotCoordinates = chariotCoordinates;
+    end
     
-    frame = step(chariotCoordinatesText, frame, chariotCoordinates, chariotCoordinates-6);
-    frame = step(gOrbCoordinatesText, frame, gOrbCoordinates, gOrbCoordinates-6);
-    frame = step(bOrbCoordinatesText, frame, bOrbCoordinates, bOrbCoordinates-6);
+    if (error == 0)
+        gOrbCoordinates = findGreenOrb(frame);
+        if ((gOrbCoordinates(1) == 0) && (gOrbCoordinates(2) == 0))
+            payload = getPayload(previousChariotCoordinates(1), previousChariotCoordinates(2), previousOrientation, 1, 0, 0);
+            fwrite(adapter, payload);
+            error = 1;
+        else
+            previousGreenCoordinates = gOrbCoordinates;
+        end
+        
+        if (error == 0)
+            bOrbCoordinates = findBlueOrb(frame);
+            if ((bOrbCoordinates(1) == 0) && (bOrbCoordinates(2) == 0))          
+                payload = getPayload(previousChariotCoordinates(1), previousChariotCoordinates(2), previousOrientation, 1, 0, 0);
+                fwrite(adapter, payload);
+                error = 1;
+            else
+                previousBlueCoordinates = bOrbCoordinates;
+            end
+            
+            if (error == 0)
+                orientation = chariotOrientation(chariotCoordinates(1), chariotCoordinates(2), gOrbCoordinates(1), gOrbCoordinates(2), bOrbCoordinates(1), bOrbCoordinates(2));
+                
+                frame = step(chariotCoordinatesText, frame, chariotCoordinates, chariotCoordinates-6);
+                frame = step(gOrbCoordinatesText, frame, gOrbCoordinates, gOrbCoordinates-6);
+                frame = step(bOrbCoordinatesText, frame, bOrbCoordinates, bOrbCoordinates-6);
+                frame = step(orientationText, frame, orientation, chariotCoordinates-75);
+                
+                payload = getPayload(chariotCoordinates(1), chariotCoordinates(2), orientation, 0, 0, 0);
     
-    orientation = chariotOrientation(chariotCoordinates(0), chariotCoordinates(1), gOrbCoordinates(0), gOrbCoordinates(1), bOrbCoordinates(0), bOrbCoordinates(1));
+                fwrite(adapter, payload);
     
-    step(display, frame); % Output to display
-    
+                step(display, frame); % Output to display
+            end
+        end
+    end
     i = i + 1;
 end
  
@@ -56,7 +106,9 @@ end
 release(display); % Release all memory and buffer used
 
 release(camera);
- 
+
 clear all;
- 
+
+%fclose(adapter);
+
 clc;

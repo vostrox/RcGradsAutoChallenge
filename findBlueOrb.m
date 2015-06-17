@@ -1,9 +1,10 @@
 %function [out] = findGreenOrb(image, chariotX, chariotY)
 function [out] = findBlueOrb(image)
-    minThresh = 0.2; % Minimum intensity for threshold
+    minThresh = 0.50; % Minimum intensity for threshold
+    %minThresh = 150; % TEST IMAGE VALUE Minimum intensity for threshold
     maxThresh = 255; % Minimum intesity for threshold
     
-    rectLength = 200;
+    %rectLength = 200;
     
     minBlobArea = 50;
     maxBlobArea = 1000;
@@ -24,22 +25,27 @@ function [out] = findBlueOrb(image)
         'MaximumBlobArea', maxBlobArea, ...
         'MaximumCount', count);
     
-    blueChannel = imsubtract(convertToGrey(image,0,0,1), convertToGrey(image,0.33,0.33,0.33)); % Get blue component of the image
-    blueChannel = 2*medfilt2(blueChannel, [filterSize filterSize]); % Filter out the noise using median filter
-    
-    imshow(blueChannel);
-    
+    blueChannel = imsubtract(convertToGrey(image,0,0,1), rgb2gray(image)); % Get blue component of the image
+    blueChannel = 2 * medfilt2(blueChannel, [filterSize filterSize]); % Filter out the noise using median filter
+
     binFrame = threshold(blueChannel,minThresh,maxThresh); % Convert the image into binary image with the blue objects as white
     
-    figure, imshow(binFrame);
+    %imshow(binFrame);
     
     [centroid, bbox] = step(hblob, binFrame); % Get the centroids and bounding boxes of the blobs
     
-    centroid = uint16(centroid); % Convert the centroids into Integer for further steps
+    centroid = uint16(centroid); % Convert the centroids to 16 bit ints for further steps
     
-    for object = 1:1:length(bbox(:,1)) % Write the corresponding centroids
-        orbX = centroid(object,1);
-        orbY = centroid(object,2);
+    objectCount = length(bbox(:,1));
+    
+    if (objectCount > 0)
+        for object = 1:1:objectCount % Write the corresponding centroids
+            orbX = centroid(object,1);
+            orbY = centroid(object,2);
+        end
+    else
+        orbX = 0;
+        orbY = 0;
     end
 
     out = [orbX orbY];
