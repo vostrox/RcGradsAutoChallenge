@@ -1,5 +1,5 @@
-function sendPayload(ip, payload)
-    adapter = udp(ip);
+function sendPayload(payload)
+    adapter = udp('255.255.255.255', 9090);
     
     fopen(adapter);
     

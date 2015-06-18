@@ -1,4 +1,7 @@
 function [out] = chariotOrientation(chariotX, chariotY, greenX, greenY, blueX, blueY)
+    %adjuster is used to align axes with the onboard axes
+    adjuster = 0;
+
     greenAngle = 0;
     blueAngle = 0;
     
@@ -73,11 +76,19 @@ function [out] = chariotOrientation(chariotX, chariotY, greenX, greenY, blueX, b
     blueAngle = blueAngle + 180;
     %Ensure angle circulates past zero to prevent angles more than 360
     if (blueAngle >= 360)
-        %blueAngle = blueAngle - 360;
+        blueAngle = blueAngle - 360;
     end
     
     %calculate orientation
     orientation = (greenAngle + blueAngle) / 2;
+    
+    %align orientation with the onboard axes
+    orientation = orientation + adjuster;
+    if (orientation >= 360)
+        orientation = orientation - 360;
+    elseif (orientation < 0)
+        orientation = orientation + 360;
+    end
     
     out = int16(orientation);
 end
