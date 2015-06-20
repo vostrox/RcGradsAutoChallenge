@@ -1,6 +1,6 @@
 function [out] = chariotOrientation(chariotX, chariotY, greenX, greenY, blueX, blueY)
     %adjuster is used to align axes with the onboard axes
-    adjuster = 90;
+    adjuster = 0;
     
     greenAngle = 0;
     blueAngle = 0;
@@ -52,25 +52,25 @@ function [out] = chariotOrientation(chariotX, chariotY, greenX, greenY, blueX, b
         blueAngle = atand((chariotY - blueY) / (chariotX - blueX)) + 270;
     %Directly above chariot
     elseif ((blueX == chariotX) && (blueY < chariotY))
-        blueAngle = 180;
+        blueAngle = 0;
     %Top right
     elseif ((blueX > chariotX) && (blueY < chariotY))
         blueAngle = atand((blueX - chariotX) / (chariotY - blueY));
     %Directly right of chariot
     elseif ((blueX > chariotX) && (blueY == chariotY))
-        blueAngle = 270;
+        blueAngle = 90;
     %Bottom left
     elseif ((blueX < chariotX) && (blueY > chariotY))
         blueAngle = atand((chariotX - blueX) / (blueY - chariotY)) + 180;
     %Directly below chariot
     elseif ((blueX == chariotX) && (blueY > chariotY))
-        blueAngle = 0;
+        blueAngle = 180;
     %Bottom right
     elseif ((blueX > chariotX) && (blueY > chariotY))
         blueAngle = atand((blueY - chariotY) / (blueX - chariotX)) + 90;
     %Directly left of chariot
     elseif ((blueX < chariotX) && (blueY == chariotY))
-        blueAngle = 90;
+        blueAngle = 270;
     end
     %Add 180 to get mirrored angle
     blueAngle = blueAngle + 180;
@@ -79,14 +79,26 @@ function [out] = chariotOrientation(chariotX, chariotY, greenX, greenY, blueX, b
         blueAngle = blueAngle - 360;
     end
     
+    %fprintf('Green: %d\n', greenAngle);
+    %fprintf('Blue: %d\n', blueAngle);
+    
     %calculate orientation
-    orientation = (greenAngle + blueAngle) / 2;
+    %orientation = (greenAngle + blueAngle) / 2;
+    orientation = blueAngle;
+    
+    %fprintf('Orientation: %d\n', orientation);
     
     %align orientation with onboard axes
-    orientation = orientation + adjuster;
-    if (orientation >= 360)
-        orientation = orientation - 360;
-    end
+    %orientation = orientation + adjuster;
+    %if (orientation >= 360)
+    %    orientation = orientation - 360;
+    %end
+    
+    %format into 0 to 180 / 0 to -180
+    %if (orientation > 180)
+    %    orientation = 360 - orientation;
+    %    orientation = orientation * -1;
+    %end
     
     out = int16(orientation);
 end

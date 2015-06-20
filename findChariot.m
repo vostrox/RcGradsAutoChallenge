@@ -1,5 +1,5 @@
 function [out] = findChariot(image)
-    minThresh = 0.15; % Minimum intensity for threshold
+    minThresh = 0.35; % Minimum intensity for threshold
     %minThresh = 80; % TEST IMAGE VALUE Minimum intensity for threshold
     maxThresh = 255; % Minimum intesity for threshold
     minBlobArea = 500;
@@ -21,7 +21,7 @@ function [out] = findChariot(image)
     
     binFrame = threshold(redChannel,minThresh,maxThresh); % Convert the image into binary image with the red objects as white
     
-    %imshow(binFrame);
+    imshow(binFrame);
     
     [centroid, bbox] = step(hblob, binFrame); % Get the centroids and bounding boxes of the blobs
     

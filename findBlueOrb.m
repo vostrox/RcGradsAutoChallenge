@@ -1,11 +1,11 @@
 function [out] = findBlueOrb(image, chariotX, chariotY, rectSize)
 %function [out] = findBlueOrb(image)
-    minThresh = 0.50; % Minimum intensity for threshold
+    minThresh = 0.20; % Minimum intensity for threshold
     %minThresh = 150; % TEST IMAGE VALUE Minimum intensity for threshold
     maxThresh = 255; % Minimum intesity for threshold
     
     minBlobArea = 50;
-    maxBlobArea = 1000;
+    maxBlobArea = 100000;
     count = 1;
     filterSize = 1;
     orbX = 0;
@@ -27,6 +27,7 @@ function [out] = findBlueOrb(image, chariotX, chariotY, rectSize)
     blueChannel = 2 * medfilt2(blueChannel, [filterSize filterSize]); % Filter out the noise using median filter
 
     binFrame = threshold(blueChannel,minThresh,maxThresh); % Convert the image into binary image with the blue objects as white
+    binFrame = imdilate(binFrame, strel('disk', 1));
     
     %imshow(binFrame);
     

@@ -6,7 +6,7 @@ fopen(adapter);
 rectSize = 150;
 
 %% Initialization
-frames = 50;
+frames = 1000000;
 
 
 camera = imaq.VideoDevice('winvideo', 1, 'MJPG_1280x720', ... % Acquire input video stream
@@ -36,7 +36,7 @@ orientationText = vision.TextInserter('Text', 'Orientation: %4d', ... % set text
     'Color', [255 255 0], ... // yellow text
     'FontSize', 12);
 
-%imshow(step(camera));
+imshow(step(camera));
 
 i = 0; % Frame number initialization
 
@@ -56,7 +56,9 @@ while(i < frames)
     error = 0;
     
     frame = step(camera); % Acquire single frame
-        
+    frame(1:720,1:220,:) = 0;
+    frame(1:720,940:1280,:) = 0;
+    
     chariotCoordinates = findChariot(frame);
     if ((chariotCoordinates(1) == 0) && (chariotCoordinates(2) == 0))  
         payload = getPayload(previousChariotCoordinates(1), previousChariotCoordinates(2), previousOrientation, 1, 0, 0);
@@ -95,7 +97,7 @@ while(i < frames)
                 orientation = chariotOrientation(chariotCoordinates(1), chariotCoordinates(2), gOrbCoordinates(1), gOrbCoordinates(2), bOrbCoordinates(1), bOrbCoordinates(2));
                 
                 frame = step(bOrbCoordinatesText, frame, bOrbCoordinates, bOrbCoordinates-6);
-                frame(1:20,1:103,:) = 0; % draw a black box in the top left corner
+                frame(1:20,1:110,:) = 0; % draw a black box in the top left corner
                 frame = step(orientationText, frame, orientation, int32([5 3]));
                 
                 payload = getPayload(chariotCoordinates(1), chariotCoordinates(2), orientation, 0, 0, 0);
