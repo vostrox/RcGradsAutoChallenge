@@ -1,7 +1,4 @@
 function [out] = chariotOrientation(chariotX, chariotY, greenX, greenY, blueX, blueY)
-    %adjuster is used to align axes with the onboard axes
-    adjuster = 0;
-    
     greenAngle = 0;
     blueAngle = 0;
     
@@ -72,7 +69,7 @@ function [out] = chariotOrientation(chariotX, chariotY, greenX, greenY, blueX, b
     elseif ((blueX < chariotX) && (blueY == chariotY))
         blueAngle = 270;
     end
-    %Add 180 to get mirrored angle
+    %Add 180 to get chariot orientation according to mirrored blue angle
     blueAngle = blueAngle + 180;
     %Ensure angle circulates past zero to prevent angles more than 360
     if (blueAngle >= 360)
@@ -82,18 +79,31 @@ function [out] = chariotOrientation(chariotX, chariotY, greenX, greenY, blueX, b
     %fprintf('Green: %d\n', greenAngle);
     %fprintf('Blue: %d\n', blueAngle);
     
-    %calculate orientation
-    %orientation = (greenAngle + blueAngle) / 2;
-    orientation = blueAngle;
+    %if angles are in the top half, mirror them, average them, then mirror the average
+    if (((greenAngle < 45) || (greenAngle > 315)) && ((blueAngle < 45) || (blueAngle > 315)))
+        greenAngle = greenAngle + 180;
+        blueAngle = blueAngle + 180;
+        
+        if (greenAngle >= 360)
+            greenAngle = greenAngle - 360;
+        end
+        if (blueAngle >= 360)
+            blueAngle = blueAngle - 360;
+        end
+        
+        orientation = (greenAngle + blueAngle) / 2;
+        
+        orientation = orientation + 180;
+        
+        if (orientation >= 360)
+            orientation = orientation - 360;
+        end
+    else
+        orientation = (greenAngle + blueAngle) / 2;
+    end
     
     %fprintf('Orientation: %d\n', orientation);
-    
-    %align orientation with onboard axes
-    %orientation = orientation + adjuster;
-    %if (orientation >= 360)
-    %    orientation = orientation - 360;
-    %end
-    
+
     %format into 0 to 180 / 0 to -180
     %if (orientation > 180)
     %    orientation = 360 - orientation;
