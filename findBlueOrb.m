@@ -1,5 +1,5 @@
 function [out] = findBlueOrb(image, chariotX, chariotY, rectSize)
-    minThresh = 0.10; % Minimum intensity for threshold
+    minThresh = 0.30; % Minimum intensity for threshold
     %minThresh = 0.20; % Minimum intensity for threshold - 2015 VALUE
     %minThresh = 150; % TEST IMAGE VALUE Minimum intensity for threshold
     maxThresh = 255; % Minimum intesity for threshold
@@ -27,9 +27,10 @@ function [out] = findBlueOrb(image, chariotX, chariotY, rectSize)
     blueChannel = 2 * medfilt2(blueChannel, [filterSize filterSize]); % Filter out the noise using median filter
 
     binFrame = threshold(blueChannel,minThresh,maxThresh); % Convert the image into binary image with the blue objects as white
-    binFrame = imdilate(binFrame, strel('disk', 1));
+    binFrame = imdilate(binFrame, strel('disk', 5));
+    binFrame = imclose(binFrame, strel('disk', 10));
     
-    %imshow(binFrame);
+    imshow(binFrame);
     
     [centroid, bbox] = step(hblob, binFrame); % Get the centroids and bounding boxes of the blobs
     

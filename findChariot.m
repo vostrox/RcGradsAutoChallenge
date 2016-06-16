@@ -1,5 +1,5 @@
 function [out] = findChariot(image)
-    minThresh = 0.35; % Minimum intensity for threshold
+    minThresh = 0.25; % Minimum intensity for threshold
     %minThresh = 80; % TEST IMAGE VALUE Minimum intensity for threshold
     maxThresh = 255; % Minimum intesity for threshold
     minBlobArea = 500;
@@ -17,9 +17,10 @@ function [out] = findChariot(image)
         'MaximumCount', count);
     
     redChannel = imsubtract(convertToGrey(image,1,0,0), rgb2gray(image)); % Get red component of the image
-    redChannel = medfilt2(redChannel, [filterSize filterSize]); % Filter out the noise using median filter
+    %redChannel = medfilt2(redChannel, [filterSize filterSize]); % Filter out the noise using median filter
     
     binFrame = threshold(redChannel,minThresh,maxThresh); % Convert the image into binary image with the red objects as white
+    binFrame = imclose(binFrame, strel('disk', 5));
     
     %imshow(binFrame);
     

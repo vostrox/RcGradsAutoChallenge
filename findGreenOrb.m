@@ -2,7 +2,7 @@ function [out] = findGreenOrb(image, chariotX, chariotY, rectSize)
     %minThresh = 0.14; % Minimum intensity for threshold VALUE USED ON 2015
     %CHARIOT
     %minThresh = 100; % TEST IMAGE VALUE Minimum intensity for threshold
-    minThresh = 0.1;
+    minThresh = 0.10;
     maxThresh = 255; % Minimum intesity for threshold
     
     minBlobArea = 300;
@@ -28,7 +28,8 @@ function [out] = findGreenOrb(image, chariotX, chariotY, rectSize)
     greenChannel = 2 * medfilt2(greenChannel, [filterSize filterSize]); % Filter out the noise using median filter
     
     binFrame = threshold(greenChannel,minThresh,maxThresh); % Convert the image into binary image with the green objects as white
-    binFrame = imdilate(binFrame, strel('disk', 2));
+    binFrame = imdilate(binFrame, strel('disk', 5));
+    binFrame = imclose(binFrame, strel('disk', 10));
     
     %imshow(binFrame);
     
