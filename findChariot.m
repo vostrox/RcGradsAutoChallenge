@@ -15,13 +15,13 @@ function [out] = findChariot(image)
         'MinimumBlobArea', minBlobArea, ...
         'MaximumBlobArea', maxBlobArea, ...
         'MaximumCount', count);
-
+    
     redChannel = imsubtract(convertToGrey(image,1,0,0), rgb2gray(image)); % Get red component of the image
     redChannel = medfilt2(redChannel, [filterSize filterSize]); % Filter out the noise using median filter
     
     binFrame = threshold(redChannel,minThresh,maxThresh); % Convert the image into binary image with the red objects as white
     
-    imshow(binFrame);
+    %imshow(binFrame);
     
     [centroid, bbox] = step(hblob, binFrame); % Get the centroids and bounding boxes of the blobs
     

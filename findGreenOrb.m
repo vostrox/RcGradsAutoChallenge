@@ -1,10 +1,11 @@
 function [out] = findGreenOrb(image, chariotX, chariotY, rectSize)
-%function [out] = findGreenOrb(image)
-    minThresh = 0.14; % Minimum intensity for threshold
+    %minThresh = 0.14; % Minimum intensity for threshold VALUE USED ON 2015
+    %CHARIOT
     %minThresh = 100; % TEST IMAGE VALUE Minimum intensity for threshold
+    minThresh = 0.1;
     maxThresh = 255; % Minimum intesity for threshold
     
-    minBlobArea = 50;
+    minBlobArea = 300;
     maxBlobArea = 100000;
     count = 1;
     filterSize = 1;

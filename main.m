@@ -3,13 +3,13 @@ ip = '255.255.255.255';
 adapter = udp(ip);
 fopen(adapter);
 
-rectSize = 150;
+rectSize = 300;
 
 %% Initialization
 frames = 1000000;
 
 
-camera = imaq.VideoDevice('winvideo', 1, 'MJPG_1280x720', ... % Acquire input video stream
+camera = imaq.VideoDevice('winvideo', 2, 'MJPG_1280x720', ... % Acquire input video stream
     'ROI', [1 1 1280 720], ...
     'ReturnedColorSpace', 'rgb');
 
@@ -18,7 +18,8 @@ camInfo = imaqhwinfo(camera); % Acquire input video property
 display = vision.VideoPlayer('Name', 'Chariotometer', ... % Output video player
     'Position', [0 0 camInfo.MaxWidth camInfo.MaxHeight]);
     %'Position', [100 50 camInfo.MaxWidth+20 camInfo.MaxHeight+25]);
- 
+
+    
 chariotCoordinatesText = vision.TextInserter('Text', '+ X:%4d, Y:%4d', ... % set text for centroid
     'LocationSource', 'Input port', ...
     'Color', [255 0 0], ... // red text
@@ -56,8 +57,9 @@ while(i < frames)
     error = 0;
     
     frame = step(camera); % Acquire single frame
-    frame(1:720,1:220,:) = 0;
-    frame(1:720,940:1280,:) = 0;
+    
+    % Draw black borders
+    frame = insertBorders(frame);
     
     chariotCoordinates = findChariot(frame);
     if ((chariotCoordinates(1) == 0) && (chariotCoordinates(2) == 0))  
